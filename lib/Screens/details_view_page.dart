@@ -4,8 +4,8 @@ import 'package:make_my_idea/constants/app_colors.dart';
 import 'package:make_my_idea/constants/app_images.dart';
 import 'package:make_my_idea/constants/text_Style_utility.dart';
 import 'package:make_my_idea/global_responsive_functions.dart';
-import 'package:make_my_idea/wishlist_bloc/wishlist_bloc.dart';
-import 'package:make_my_idea/wishlist_bloc/wishlist_event.dart';
+import 'package:make_my_idea/bloc/wishlist_bloc/wishlist_bloc.dart';
+import 'package:make_my_idea/bloc/wishlist_bloc/wishlist_event.dart';
 
 class DetailsViewPage extends StatefulWidget {
   const DetailsViewPage({super.key, required this.productData});
@@ -61,7 +61,9 @@ class _DetailsViewPageState extends State<DetailsViewPage> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            context.read<WishlistBloc>().add(AddToWishlistEvent(productData: productData));
+                            context.read<WishlistBloc>().add(
+                              AddToWishlistEvent(productData: productData),
+                            );
                           },
                           child: Icon(
                             Icons.favorite_border_outlined,
