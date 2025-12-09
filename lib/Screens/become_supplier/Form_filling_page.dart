@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:make_my_idea/constants/app_colors.dart';
 import 'package:make_my_idea/constants/text_Style_utility.dart';
-import 'package:make_my_idea/global_responsive_functions.dart';
+import 'package:make_my_idea/constants/global_responsive_functions.dart';
 
 class formFillingPage extends StatefulWidget {
   @override

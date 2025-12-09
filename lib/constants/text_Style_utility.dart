@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../global_responsive_functions.dart';
+import 'global_responsive_functions.dart';
 
 class textStyleUtility {
   TextStyle regular(BuildContext context, double fontSize, Color color) {
