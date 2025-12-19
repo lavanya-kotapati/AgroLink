@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:make_my_idea/Screens/login_page.dart';
+import 'package:make_my_idea/bloc/signup_bloc/signup_bloc.dart';
+import 'package:make_my_idea/bloc/signup_bloc/signup_event.dart';
+import 'package:make_my_idea/bloc/signup_bloc/signup_state.dart';
 import 'package:make_my_idea/constants/app_colors.dart';
 import 'package:make_my_idea/constants/app_constants.dart';
 import 'package:make_my_idea/constants/app_images.dart';
+import 'package:make_my_idea/constants/popup.dart';
 import 'package:make_my_idea/constants/text_Style_utility.dart';
 import 'package:make_my_idea/constants/global_responsive_functions.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -22,251 +26,293 @@ class _SignupPageState extends State<SignupPage> {
   bool _isObscured = true;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Container(color: Colors.white),
-          Expanded(
-            child: Column(
-              children: [
-                Expanded(child: Container(color: AppColors.forestGreen)),
-                Expanded(child: Container(color: AppColors.white)),
-              ],
-            ),
-          ),
-          Column(
+    return BlocConsumer<SignupBloc, SignupState>(
+      listener: (context, state) async {
+        // if (state is SignupLoadingState) {
+        //   AppLoader.show(context, message: 'Signing Up');
+        //   await Future.delayed(const Duration(seconds: 100));
+        //   // Navigator.pop(context);
+        //   AppLoader.hide(context);
+        // }
+        if (state is SignupLoadingState) {
+          AppLoader.show(context, message: 'Signing up...');
+        }
+
+        if (state is SignupLoadedState) {
+          AppLoader.hide(context);
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => LoginPage()),
+          );
+        }
+
+        if (state is SignupErrorState) {
+          AppLoader.hide(context);
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          body: Stack(
             children: [
-              SizedBox(height: buildHeight(context, 110)),
-              Center(
-                child: Image.asset(
-                  AppImages.logo2,
-                  height: buildHeight(context, 160),
-                ),
-              ),
-              Center(
-                child: RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Welcome to ",
-                        style: textStyleUtility().regular(
-                          context,
-                          75,
-                          AppColors.white,
-                        ),
-                      ),
-                      TextSpan(
-                        text: AppConstants.appName,
-                        style: textStyleUtility().bold(
-                          context,
-                          75,
-                          AppColors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: buildHeight(context, 62)),
-              Container(
-                height: buildHeight(context, 540),
-                width: buildWidth(context, 1100),
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  border: BoxBorder.all(color: AppColors.lightGray),
-                  borderRadius: BorderRadius.circular(23),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.mediumGray,
-                      spreadRadius: 0.2,
-                      blurRadius: 6,
-                    ),
-                  ],
-                ),
+              Container(color: Colors.white),
+              Expanded(
                 child: Column(
                   children: [
-                    SizedBox(height: buildHeight(context, 15)),
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: AppColors.charcoal),
-                        ),
-                        prefixIcon: Icon(
-                          Icons.person,
-                          size: buildHeight(context, 22),
-                        ),
-                        labelText: AppConstants.enterNameText,
-                        labelStyle: textStyleUtility().regular(
-                          context,
-                          55,
-                          AppColors.charcoal,
-                        ),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    SizedBox(height: buildHeight(context, 25)),
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: AppColors.charcoal),
-                        ),
-                        prefixIcon: Icon(
-                          Icons.email,
-                          size: buildHeight(context, 22),
-                        ),
-                        labelText: AppConstants.enterGmailText,
-                        labelStyle: textStyleUtility().regular(
-                          context,
-                          55,
-                          AppColors.charcoal,
-                        ),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    SizedBox(height: buildHeight(context, 25)),
-                    // TextFormField(
-                    //   controller: _passwordController,
-                    //   decoration: InputDecoration(
-                    //     focusedBorder: OutlineInputBorder(
-                    //       borderSide: BorderSide(color: AppColors.charcoal),
-                    //     ),
-                    //     prefixIcon: Icon(
-                    //       Icons.password,
-                    //       size: buildHeight(context, 22),
-                    //     ),
-
-                    //     labelText: AppConstants.enterPasswordText,
-                    //     labelStyle: textStyleUtility().regular(
-                    //       context,
-                    //       55,
-                    //       AppColors.charcoal,
-                    //     ),
-                    //     border: OutlineInputBorder(),
-                    //   ),
-                    // ),
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _isObscured, // 👈 hide text
-                      decoration: InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: AppColors.charcoal),
-                        ),
-
-                        prefixIcon: Icon(
-                          Icons.password,
-                          size: buildHeight(context, 22),
-                        ),
-
-                        // 👇 Added suffix eye icon toggle
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _isObscured
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            color: AppColors.charcoal,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _isObscured = !_isObscured;
-                            });
-                          },
-                        ),
-
-                        labelText: AppConstants.enterPasswordText,
-                        labelStyle: textStyleUtility().regular(
-                          context,
-                          55,
-                          AppColors.charcoal,
-                        ),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    SizedBox(height: buildHeight(context, 25)),
-
-                    TextFormField(
-                      controller: _reEnterPasswordController,
-                      obscureText: true, // 👈 hide text
-                      decoration: InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: AppColors.charcoal),
-                        ),
-
-                        prefixIcon: Icon(
-                          Icons.password_outlined,
-                          size: buildHeight(context, 22),
-                        ),
-
-                        labelText: AppConstants.reEnterPasswordText,
-                        labelStyle: textStyleUtility().regular(
-                          context,
-                          55,
-                          AppColors.charcoal,
-                        ),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    SizedBox(height: buildHeight(context, 30)),
-                    SizedBox(
-                      height: buildHeight(context, 50),
-                      width: buildWidth(context, 490),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.darkGreen,
-                          shadowColor: AppColors.forestGreen,
-                        ),
-                        onPressed: () {},
-                        child: Text(
-                          "SIGN UP",
-                          style: textStyleUtility().semiBold(
-                            context,
-                            49,
-                            AppColors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: buildHeight(context, 18)),
-                    GestureDetector(
-                      onTap: () {
-                        // navigate to Login page
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => LoginPage()),
-                        );
-                      },
-                      child: RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: "Continue to Login?  ",
-                              style: textStyleUtility().regular(
-                                context,
-                                53,
-                                AppColors.black,
-                              ),
-                            ),
-                            TextSpan(
-                              text: "Login",
-                              style: textStyleUtility().bold(
-                                context,
-                                53,
-                                AppColors.darkGreen,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    Expanded(child: Container(color: AppColors.forestGreen)),
+                    Expanded(child: Container(color: AppColors.white)),
                   ],
                 ),
+              ),
+              Column(
+                children: [
+                  SizedBox(height: buildHeight(context, 110)),
+                  Center(
+                    child: Image.asset(
+                      AppImages.logo2,
+                      height: buildHeight(context, 160),
+                    ),
+                  ),
+                  Center(
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "Welcome to ",
+                            style: textStyleUtility().regular(
+                              context,
+                              75,
+                              AppColors.white,
+                            ),
+                          ),
+                          TextSpan(
+                            text: AppConstants.appName,
+                            style: textStyleUtility().bold(
+                              context,
+                              75,
+                              AppColors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: buildHeight(context, 62)),
+                  Container(
+                    height: buildHeight(context, 540),
+                    width: buildWidth(context, 1100),
+                    padding: EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      border: BoxBorder.all(color: AppColors.lightGray),
+                      borderRadius: BorderRadius.circular(23),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.mediumGray,
+                          spreadRadius: 0.2,
+                          blurRadius: 6,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(height: buildHeight(context, 15)),
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: InputDecoration(
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: AppColors.charcoal),
+                            ),
+                            prefixIcon: Icon(
+                              Icons.person,
+                              size: buildHeight(context, 22),
+                            ),
+                            labelText: AppConstants.enterNameText,
+                            labelStyle: textStyleUtility().regular(
+                              context,
+                              55,
+                              AppColors.charcoal,
+                            ),
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        SizedBox(height: buildHeight(context, 25)),
+                        TextFormField(
+                          controller: _emailController,
+                          decoration: InputDecoration(
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: AppColors.charcoal),
+                            ),
+                            prefixIcon: Icon(
+                              Icons.email,
+                              size: buildHeight(context, 22),
+                            ),
+                            labelText: AppConstants.enterGmailText,
+                            labelStyle: textStyleUtility().regular(
+                              context,
+                              55,
+                              AppColors.charcoal,
+                            ),
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        SizedBox(height: buildHeight(context, 25)),
+                        // TextFormField(
+                        //   controller: _passwordController,
+                        //   decoration: InputDecoration(
+                        //     focusedBorder: OutlineInputBorder(
+                        //       borderSide: BorderSide(color: AppColors.charcoal),
+                        //     ),
+                        //     prefixIcon: Icon(
+                        //       Icons.password,
+                        //       size: buildHeight(context, 22),
+                        //     ),
+
+                        //     labelText: AppConstants.enterPasswordText,
+                        //     labelStyle: textStyleUtility().regular(
+                        //       context,
+                        //       55,
+                        //       AppColors.charcoal,
+                        //     ),
+                        //     border: OutlineInputBorder(),
+                        //   ),
+                        // ),
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: _isObscured, // 👈 hide text
+                          decoration: InputDecoration(
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: AppColors.charcoal),
+                            ),
+
+                            prefixIcon: Icon(
+                              Icons.password,
+                              size: buildHeight(context, 22),
+                            ),
+
+                            // 👇 Added suffix eye icon toggle
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isObscured
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: AppColors.charcoal,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isObscured = !_isObscured;
+                                });
+                              },
+                            ),
+
+                            labelText: AppConstants.enterPasswordText,
+                            labelStyle: textStyleUtility().regular(
+                              context,
+                              55,
+                              AppColors.charcoal,
+                            ),
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        SizedBox(height: buildHeight(context, 25)),
+
+                        TextFormField(
+                          controller: _reEnterPasswordController,
+                          obscureText: true, // 👈 hide text
+                          decoration: InputDecoration(
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: AppColors.charcoal),
+                            ),
+
+                            prefixIcon: Icon(
+                              Icons.password_outlined,
+                              size: buildHeight(context, 22),
+                            ),
+
+                            labelText: AppConstants.reEnterPasswordText,
+                            labelStyle: textStyleUtility().regular(
+                              context,
+                              55,
+                              AppColors.charcoal,
+                            ),
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        SizedBox(height: buildHeight(context, 30)),
+                        SizedBox(
+                          height: buildHeight(context, 50),
+                          width: buildWidth(context, 490),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.darkGreen,
+                              shadowColor: AppColors.forestGreen,
+                            ),
+                            onPressed: () {
+                              context.read<SignupBloc>().add(
+                                SignedupEvent(
+                                  _nameController.text,
+                                  _emailController.text,
+                                  _passwordController.text,
+                                  _reEnterPasswordController.text,
+                                ),
+                              );
+                            },
+                            child: Text(
+                              "SIGN UP",
+                              style: textStyleUtility().semiBold(
+                                context,
+                                49,
+                                AppColors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: buildHeight(context, 18)),
+                        GestureDetector(
+                          onTap: () {
+                            // navigate to Login page
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LoginPage(),
+                              ),
+                            );
+                          },
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Continue to Login?  ",
+                                  style: textStyleUtility().regular(
+                                    context,
+                                    53,
+                                    AppColors.black,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "Login",
+                                  style: textStyleUtility().bold(
+                                    context,
+                                    53,
+                                    AppColors.darkGreen,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

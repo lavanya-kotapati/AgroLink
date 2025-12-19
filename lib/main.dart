@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:make_my_idea/Screens/home_page.dart';
 import 'package:make_my_idea/Screens/login_page.dart';
+import 'package:make_my_idea/bloc/login_bloc/login_bloc.dart';
+import 'package:make_my_idea/bloc/login_bloc/login_service.dart';
+import 'package:make_my_idea/bloc/signup_bloc/signup_bloc.dart';
+import 'package:make_my_idea/bloc/signup_bloc/signup_service.dart';
 import 'package:make_my_idea/bloc/wishlist_bloc/wishlist_bloc.dart';
 import 'package:make_my_idea/constants/supabase_details.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -25,9 +29,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final supabase = Supabase.instance.client;
-
-    return BlocProvider(
-      create: (context) => WishlistBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => WishlistBloc()),
+        BlocProvider(create: (context) => SignupBloc(SupabaseAuthService())),
+        BlocProvider(create: (context) => LoginBloc(LoginService())),
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home:

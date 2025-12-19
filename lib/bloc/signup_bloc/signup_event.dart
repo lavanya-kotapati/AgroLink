@@ -18,5 +18,5 @@ class SignedupEvent extends SignupEvent {
     this.confirmPassword,
   );
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [name, email, password, confirmPassword];
 }

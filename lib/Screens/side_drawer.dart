@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:make_my_idea/Screens/become_supplier/Form_filling_page.dart';
 import 'package:make_my_idea/constants/app_images.dart';
 import 'package:make_my_idea/constants/app_colors.dart';
 import 'package:make_my_idea/constants/text_Style_utility.dart';

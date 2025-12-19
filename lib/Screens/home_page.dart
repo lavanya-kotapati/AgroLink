@@ -4,7 +4,6 @@ import 'package:make_my_idea/Screens/login_page.dart';
 import 'package:make_my_idea/constants/app_images.dart';
 import 'package:make_my_idea/constants/app_colors.dart';
 import 'package:make_my_idea/constants/text_Style_utility.dart';
-import 'package:make_my_idea/Screens/details_view_page.dart';
 import 'package:make_my_idea/constants/global_responsive_functions.dart';
 import 'package:make_my_idea/Screens/side_drawer.dart';
 import 'package:make_my_idea/bloc/wishlist_bloc/wishlist_bloc.dart';
